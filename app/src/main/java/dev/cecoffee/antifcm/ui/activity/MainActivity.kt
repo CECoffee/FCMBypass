@@ -3,7 +3,10 @@
 package dev.cecoffee.antifcm.ui.activity
 
 import android.content.ComponentName
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
+import android.widget.Toast
 import androidx.core.view.isVisible
 import com.highcapable.yukihookapi.YukiHookAPI
 import dev.cecoffee.antifcm.R
@@ -21,6 +24,22 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
             if (button.isPressed) hideOrShowLauncherIcon(isChecked)
         }
         // Your code here.
+        binding.githubButton.setOnClickListener { jumpToGithubPage() }
+    }
+
+    /**
+     * Github页面跳转
+     */
+
+    private fun jumpToGithubPage(){
+        try {
+            val intent = Intent(Intent.ACTION_VIEW)
+            intent.addCategory(Intent.CATEGORY_BROWSABLE)
+            intent.data = Uri.parse("https://github.com/cecoffee/fcmbypass")
+            startActivity(intent)
+        } catch (e: Exception) {
+            Toast.makeText(this, "未安装浏览器", Toast.LENGTH_SHORT).show()
+        }
     }
 
     /**
