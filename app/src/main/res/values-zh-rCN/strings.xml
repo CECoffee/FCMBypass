@@ -11,4 +11,9 @@
     <string name="hide_app_icon_on_launcher_tip">隐藏模块图标后界面可能会被关闭，将不会再在桌面显示，你可以在 EdXposed、LSPosed 中找到模块设置并打开。</string>
     <string name="hide_app_icon_on_launcher_notice">注意：请务必在 LSPosed 中关闭“强制显示桌面图标”功能</string>
     <string name="Subtitle">陈睿，柠檬什么时候酸啊？</string>
+    <string name="cancel_heartbeat">取消心跳上报</string>
+    <string name="bypass_sdk">绕过SDK验证</string>
+    <string name="settings">设置</string>
+    <string name="cancel_heartbeat_tip">防止到点踢出</string>
+    <string name="bypass_sdk_tip">测试功能，非专业人士请勿打开！</string>
 </resources>

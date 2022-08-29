@@ -1,93 +1,87 @@
 package dev.cecoffee.antifcm.hook
 
-import android.content.Context
-import android.view.ContextThemeWrapper
 import android.widget.Toast
 import com.highcapable.yukihookapi.annotation.xposed.InjectYukiHookWithXposed
 import com.highcapable.yukihookapi.hook.factory.configs
 import com.highcapable.yukihookapi.hook.factory.encase
+import com.highcapable.yukihookapi.hook.log.loggerD
+import com.highcapable.yukihookapi.hook.type.android.ActivityClass
+import com.highcapable.yukihookapi.hook.type.android.BundleClass
+import com.highcapable.yukihookapi.hook.type.java.MapClass
+import com.highcapable.yukihookapi.hook.type.java.StringType
+import com.highcapable.yukihookapi.hook.type.java.UnitType
 import com.highcapable.yukihookapi.hook.xposed.proxy.IYukiHookXposedInit
 import de.robv.android.xposed.XposedBridge
-import java.lang.Exception
+import dev.cecoffee.antifcm.ui.activity.MainActivity
 
 @InjectYukiHookWithXposed
 class HookEntry : IYukiHookXposedInit {
     override fun onInit() = configs {
         // Your code here.
+        this.debugTag = "AntiFCM"
+        this.isDebug = true
     }
 
     override fun onHook() = encase {
         // Your code here.
-        packageName
-        appInfo
-        appContext
-        try {
-            loadApp("com.bilibili.azurlane") {
-                findClass(System::class.java.toString()).hook {
-                    injectMember {
-                        method {
-                            name = "exit"
-                            param(Int)
-                        }
-                        replaceUnit { }
+        loadApp("com.bilibili.azurlane") {
+            "com.manjuu.azurlane.MainActivity".hook {
+                injectMember {
+                    method {
+                        name = "onCreate"
+                        param(BundleClass)
+                        returnType = UnitType
                     }
-                }
-                findClass(Runtime::class.java.toString()).hook {
-                    injectMember {
-                        method {
-                            name = "exit"
-                            param(Int)
-                        }
-                        replaceUnit { }
+                    afterHook {
+                        Toast.makeText(appContext,"AntiFCM:检测到游戏启动",Toast.LENGTH_SHORT).show()
                     }
-                }
-                var context: Context? = null
-                findClass(ContextThemeWrapper::class.java.toString()).hook {
-                    injectMember {
-                        method {
-                            name = "attachBaseContext"
-                            param()
-                        }
-                        beforeHook {
-                            context = args[0] as Context
-                        }
-                    }
-                }
-                try {
-                    findClass("com.gsc.base.utils.CommonParamUtils").hook {
-                        injectMember {
-                            method {
-                                name = "generateSign"
-                                param(Class.forName("java.utils.Map"))
-                                replaceAny {
-                                    this.args.forEach { if (it == "sdk_ver"){result = null} }
-                                }
-                            }
-                        }
-                    }
-                } catch (_: ClassNotFoundException) {
-                    Toast.makeText(context, "sdk_ver定位失败", Toast.LENGTH_LONG).show()
-                }
-                try {
-                    findClass("com.gsc.pub.GSCPubCommon").hook {
-                        injectMember {
-                            method {
-                                name = "startHeart"
-                                param()
-                            }
-                            replaceUnit {
-                                XposedBridge.log("取消心跳上报")
-                                if (context != null) {
-                                    Toast.makeText(context, "取消心跳上报", Toast.LENGTH_SHORT).show()
-                                }
-                            }
-                        }
-                    }
-                } catch (_: ClassNotFoundException) {
-                    XposedBridge.log("SDK未找到")
-                    Toast.makeText(context, "SDK未找到", Toast.LENGTH_LONG).show()
                 }
             }
-        }catch (_:Exception){}
+            if (MainActivity.bypassSdk) {
+                "com.gsc.base.utils.CommonParamUtils".hook {
+                    loggerD(msg = "Z: $this")
+                    injectMember {
+                        method {
+                            name = "generateSign"
+                            param(MapClass)
+                            returnType = StringType
+                        }
+                        beforeHook {
+                            (args[0] as java.util.Map<*, *>).remove("sdk_ver")
+                        }
+                    }
+                }
+
+                "okhttp3.FormBody\$Builder".hook {
+                    injectMember {
+                        method {
+                            name = "addEncoded"
+                            param(StringType, StringType)
+                        }
+                        afterHook {
+                            val key = args[0]
+                            loggerD(msg = "key: $key")
+                            if (key == "sdk_ver") {
+                                resultNull()
+                            }
+                        }
+                    }
+                }
+            }
+            if (MainActivity.cancelHeartbeat) {
+                "com.gsc.pub.GSCPubCommon".hook {
+                    injectMember {
+                        method {
+                            name = "startHeart"
+                            param(ActivityClass)
+                        }
+                        replaceUnit {
+                            XposedBridge.log("取消心跳上报")
+                            Toast.makeText(appContext, "AntiFCM:取消心跳上报", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+            }
+        }
     }
 }
