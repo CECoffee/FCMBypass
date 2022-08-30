@@ -60,7 +60,7 @@ class HookEntry : IYukiHookXposedInit {
                             name = "addEncoded"
                             param(StringType, StringType)
                         }
-                        afterHook {a
+                        afterHook {
                             val key = args[0]
                             loggerD(msg = "key: $key")
                             if (key == "sdk_ver") {
