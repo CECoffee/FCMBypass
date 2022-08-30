@@ -12,10 +12,12 @@ import com.highcapable.yukihookapi.hook.type.java.StringType
 import com.highcapable.yukihookapi.hook.type.java.UnitType
 import com.highcapable.yukihookapi.hook.xposed.proxy.IYukiHookXposedInit
 import de.robv.android.xposed.XposedBridge
+import dev.cecoffee.antifcm.application.DefaultApplication
 import dev.cecoffee.antifcm.ui.activity.MainActivity
 
 @InjectYukiHookWithXposed
 class HookEntry : IYukiHookXposedInit {
+    private val application = DefaultApplication
     override fun onInit() = configs {
         // Your code here.
         this.debugTag = "AntiFCM"
@@ -37,7 +39,7 @@ class HookEntry : IYukiHookXposedInit {
                     }
                 }
             }
-            if (MainActivity.bypassSdk) {
+            if (application.isBypassSdk()) {
                 "com.gsc.base.utils.CommonParamUtils".hook {
                     loggerD(msg = "Z: $this")
                     injectMember {
@@ -58,7 +60,7 @@ class HookEntry : IYukiHookXposedInit {
                             name = "addEncoded"
                             param(StringType, StringType)
                         }
-                        afterHook {
+                        afterHook {a
                             val key = args[0]
                             loggerD(msg = "key: $key")
                             if (key == "sdk_ver") {
@@ -68,7 +70,7 @@ class HookEntry : IYukiHookXposedInit {
                     }
                 }
             }
-            if (MainActivity.cancelHeartbeat) {
+            if (application.isCancelHeartbeat()) {
                 "com.gsc.pub.GSCPubCommon".hook {
                     injectMember {
                         method {
