@@ -3,7 +3,6 @@
 package dev.cecoffee.antifcm.ui.activity
 
 import android.content.ComponentName
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -16,20 +15,7 @@ import dev.cecoffee.antifcm.ui.activity.base.BaseActivity
 import dev.cecoffee.antifcm.application.BuildConfig
 
 class MainActivity : BaseActivity<ActivityMainBinding>() {
-    companion object{
-        var cancelHeartbeat: Boolean = true
-        var bypassSdk: Boolean = false
-    }
-
     override fun onCreate() {
-        //初始化，创建数据文件
-        val conf = getSharedPreferences("data", Context.MODE_PRIVATE)
-        val editor = conf.edit()
-        if(!(conf.contains("cancelHeartbeat")&&conf.contains("bypassSdk")))
-            editor.putBoolean("cancelHeartbeat", true)
-            editor.putBoolean("bypassSdk",false)
-            editor.apply()
-
         refreshModuleStatus()
         binding.mainTextVersion.text = getString(R.string.module_version, BuildConfig.VERSION_NAME)
         binding.hideIconInLauncherSwitch.isChecked = isLauncherIconShowing.not()
@@ -37,37 +23,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
             if (button.isPressed) hideOrShowLauncherIcon(isChecked)
         }
         // my code
-        binding.cancelHeartbeatSwitch.isChecked = conf.getBoolean("cancelHeartbeat",true)
-        cancelHeartbeat = conf.getBoolean("cancelHeartbeat",true)
-        binding.cancelHeartbeatSwitch.setOnCheckedChangeListener{ button, isChecked ->
-            if (button.isPressed) cancelHeartbeatSwitch(isChecked)
-        }
-        binding.bypassSdkSwitch.isChecked = conf.getBoolean("bypassSdk",false)
-        bypassSdk = conf.getBoolean("bypassSdk",false)
-        binding.bypassSdkSwitch.setOnCheckedChangeListener{ button, isChecked ->
-            if (button.isPressed) bypassSDK(isChecked)
-        }
         binding.githubButton.setOnClickListener { jumpToGithubPage() }
-    }
-
-    /**
-     * 心跳上报开关
-     */
-    private fun cancelHeartbeatSwitch(isChecked: Boolean){
-        val editor = getSharedPreferences("data", Context.MODE_PRIVATE).edit()
-        if (isChecked) editor.putBoolean("cancelHeartbeat",true) else editor.putBoolean("cancelHeartbeat",false)
-        editor.apply()
-        cancelHeartbeat = isChecked
-    }
-
-    /**
-     * SDK绕过开关
-     */
-    private fun bypassSDK(isChecked:Boolean){
-        val editor = getSharedPreferences("data",Context.MODE_PRIVATE).edit()
-        if (isChecked) editor.putBoolean("bypassSdk",true) else editor.putBoolean("bypassSdk",false)
-        editor.apply()
-        bypassSdk = isChecked
     }
 
     /**

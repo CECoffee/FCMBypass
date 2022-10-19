@@ -4,15 +4,11 @@ import android.widget.Toast
 import com.highcapable.yukihookapi.annotation.xposed.InjectYukiHookWithXposed
 import com.highcapable.yukihookapi.hook.factory.configs
 import com.highcapable.yukihookapi.hook.factory.encase
-import com.highcapable.yukihookapi.hook.log.loggerD
 import com.highcapable.yukihookapi.hook.type.android.ActivityClass
 import com.highcapable.yukihookapi.hook.type.android.BundleClass
-import com.highcapable.yukihookapi.hook.type.java.MapClass
-import com.highcapable.yukihookapi.hook.type.java.StringType
 import com.highcapable.yukihookapi.hook.type.java.UnitType
 import com.highcapable.yukihookapi.hook.xposed.proxy.IYukiHookXposedInit
 import de.robv.android.xposed.XposedBridge
-import dev.cecoffee.antifcm.ui.activity.MainActivity
 
 @InjectYukiHookWithXposed
 class HookEntry : IYukiHookXposedInit {
@@ -37,7 +33,7 @@ class HookEntry : IYukiHookXposedInit {
                     }
                 }
             }
-            if (MainActivity.bypassSdk) {
+            /*if (MainActivity.bypassSdk) {
                 "com.gsc.base.utils.CommonParamUtils".hook {
                     loggerD(msg = "Z: $this")
                     injectMember {
@@ -67,21 +63,20 @@ class HookEntry : IYukiHookXposedInit {
                         }
                     }
                 }
-            }
-            if (MainActivity.cancelHeartbeat) {
-                "com.gsc.pub.GSCPubCommon".hook {
-                    injectMember {
-                        method {
-                            name = "startHeart"
-                            param(ActivityClass)
-                        }
-                        replaceUnit {
-                            XposedBridge.log("取消心跳上报")
-                            Toast.makeText(appContext, "AntiFCM:取消心跳上报", Toast.LENGTH_SHORT).show()
-                        }
+            }*/
+            "com.gsc.pub.GSCPubCommon".hook {
+                injectMember {
+                    method {
+                        name = "startHeart"
+                        param(ActivityClass)
+                    }
+                    replaceUnit {
+                        XposedBridge.log("取消心跳上报")
+                        Toast.makeText(appContext, "AntiFCM:取消心跳上报", Toast.LENGTH_SHORT).show()
                     }
                 }
             }
+
         }
     }
 }
