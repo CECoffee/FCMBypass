@@ -11,9 +11,12 @@ import com.highcapable.yukihookapi.hook.type.java.MapClass
 import com.highcapable.yukihookapi.hook.type.java.StringType
 import com.highcapable.yukihookapi.hook.type.java.UnitType
 import com.highcapable.yukihookapi.hook.xposed.proxy.IYukiHookXposedInit
+import org.ktorm.database.Database
 import de.robv.android.xposed.XposedBridge
 import dev.cecoffee.antifcm.application.DefaultApplication
-import dev.cecoffee.antifcm.ui.activity.MainActivity
+import dev.cecoffee.antifcm.utils.factory.UserDB
+import org.ktorm.entity.sequenceOf
+import java.io.FileInputStream
 
 @InjectYukiHookWithXposed
 class HookEntry : IYukiHookXposedInit {
@@ -29,6 +32,19 @@ class HookEntry : IYukiHookXposedInit {
         loadApp("com.bilibili.azurlane") {
             "com.manjuu.azurlane.MainActivity".hook {
                 injectMember {
+                    beforeHook {
+                        val path = appContext.filesDir
+                        FileInputStream(path.path + "/databases/users.db").use {
+                            try {
+                                val database = Database.connect("jdbc:sqlite:${path.path}/databases/users.db", "org.sqlite.JDBC")
+                                val userDB = database.sequenceOf(UserDB)
+                                Toast.makeText(appContext,userDB.totalRecords,Toast.LENGTH_SHORT).show()
+                            }catch (e:Exception){
+                                XposedBridge.log(e)
+                                Toast.makeText(appContext,"数据库连接失败",Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    }
                     method {
                         name = "onCreate"
                         param(BundleClass)
