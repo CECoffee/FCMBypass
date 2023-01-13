@@ -5,12 +5,12 @@ plugins {
 }
 
 android {
-    compileSdk 32
+    compileSdk 33
 
     defaultConfig {
         applicationId "dev.cecoffee.antifcm"
         minSdk 27
-        targetSdk 32
+        targetSdk 33
         versionCode rootProject.ext.appVersionCode
         versionName rootProject.ext.appVersionName
 
