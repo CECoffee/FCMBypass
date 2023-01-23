@@ -50,9 +50,7 @@ class DialogBuilder(val context: Context, private val isUseBlackTheme: Boolean) 
     var msg
         get() = ""
         set(value) {
-            runInSafe {
-                instanceAndroid?.setMessage(value)
-            }
+            runInSafe { instanceAndroid?.setMessage(value) }
         }
 
     /** 设置进度条对话框消息内容 */

@@ -14,6 +14,8 @@ import com.highcapable.yukihookapi.hook.xposed.proxy.IYukiHookXposedInit
 import org.ktorm.database.Database
 import de.robv.android.xposed.XposedBridge
 import dev.cecoffee.antifcm.application.DefaultApplication
+import dev.cecoffee.antifcm.utils.factory.DataHandler.Companion.uidDataList
+import dev.cecoffee.antifcm.utils.factory.DataSelectDialog
 import dev.cecoffee.antifcm.utils.factory.UserDB
 import org.ktorm.entity.sequenceOf
 import java.io.FileInputStream
@@ -33,18 +35,22 @@ class HookEntry : IYukiHookXposedInit {
             "com.manjuu.azurlane.MainActivity".hook {
                 injectMember {
                     beforeHook {
-                        val path = appContext.filesDir
-                        FileInputStream(path.path + "/databases/users.db").use {
-                            try {
-                                val database = Database.connect("jdbc:sqlite:${path.path}/databases/users.db", "org.sqlite.JDBC")
-                                val userDB = database.sequenceOf(UserDB)
-                                Toast.makeText(appContext,userDB.totalRecords,Toast.LENGTH_SHORT).show()
-                            }catch (e:Exception){
-                                XposedBridge.log(e)
-                                Toast.makeText(appContext,"数据库连接失败",Toast.LENGTH_SHORT).show()
+                        val path = appContext?.filesDir
+                        if (path != null) {
+                            FileInputStream(path.path + "/databases/users.db").use {
+                                try {
+                                    val database = Database.connect("jdbc:sqlite:${path.path}/databases/users.db", "org.sqlite.JDBC")
+                                    val userDB = database.sequenceOf(UserDB)
+                                    //TODO 将数据库中的所有uid读取到uidDataList中
+                                    Toast.makeText(appContext,userDB.totalRecords,Toast.LENGTH_SHORT).show()
+                                }catch (e:Exception){
+                                    XposedBridge.log(e)
+                                    Toast.makeText(appContext,"数据库连接失败",Toast.LENGTH_SHORT).show()
+                                }
                             }
-                        }
+                        } else { XposedBridge.log("path为null") }
                     }
+                    // 以上纯乱写，不保证能用
                     method {
                         name = "onCreate"
                         param(BundleClass)
@@ -52,9 +58,13 @@ class HookEntry : IYukiHookXposedInit {
                     }
                     afterHook {
                         Toast.makeText(appContext,"AntiFCM:检测到游戏启动",Toast.LENGTH_SHORT).show()
+                        DataSelectDialog().showDataSelectDialog(uidDataList)
                     }
                 }
             }
+
+            //TODO 找到sdk登录接口，将uid等数据注入
+
             if (application.isBypassSdk()) {
                 "com.gsc.base.utils.CommonParamUtils".hook {
                     loggerD(msg = "Z: $this")
