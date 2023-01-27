@@ -183,24 +183,24 @@
             android:textSize="15sp" />
 
         <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
-            android:alpha="0.6"
-            android:lineSpacingExtra="6dp"
-            android:text="@string/hide_app_icon_on_launcher_tip"
-            android:textColor="@color/colorTextDark"
-            android:textSize="12sp" />
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:alpha="0.6"
+                android:lineSpacingExtra="6dp"
+                android:text="@string/hide_app_icon_on_launcher_tip"
+                android:textColor="#BDBDBD"
+                android:textSize="12sp"/>
 
         <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
-            android:alpha="0.6"
-            android:lineSpacingExtra="6dp"
-            android:text="@string/hide_app_icon_on_launcher_notice"
-            android:textColor="#FF5722"
-            android:textSize="12sp" />
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                android:alpha="0.6"
+                android:lineSpacingExtra="6dp"
+                android:text="@string/hide_app_icon_on_launcher_notice"
+                android:textColor="#FF9E80"
+                android:textSize="12sp"/>
     </LinearLayout>
     <LinearLayout
             android:layout_width="match_parent"
@@ -252,8 +252,8 @@
                 android:alpha="0.6"
                 android:lineSpacingExtra="6dp"
                 android:text="@string/cancel_heartbeat_tip"
-                android:textColor="@color/colorTextDark"
-                android:textSize="12sp" />
+                android:textColor="#BDBDBD"
+                android:textSize="12sp"/>
         <dev.cecoffee.antifcm.ui.view.MaterialSwitch
                 android:id="@+id/bypass_sdk_switch"
                 android:layout_width="match_parent"
@@ -269,7 +269,7 @@
                 android:alpha="0.6"
                 android:lineSpacingExtra="6dp"
                 android:text="@string/bypass_sdk_tip"
-                android:textColor="#FF5722"
-                android:textSize="12sp" />
+                android:textColor="#FF9E80"
+                android:textSize="12sp"/>
     </LinearLayout>
 </LinearLayout>

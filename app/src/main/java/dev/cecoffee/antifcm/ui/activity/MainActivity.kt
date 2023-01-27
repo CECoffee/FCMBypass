@@ -3,23 +3,23 @@
 package dev.cecoffee.antifcm.ui.activity
 
 import android.content.ComponentName
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.widget.Toast
 import androidx.core.view.isVisible
 import com.highcapable.yukihookapi.YukiHookAPI
+import com.highcapable.yukihookapi.YukiHookAPI.Status.Executor
+import com.highcapable.yukihookapi.hook.factory.modulePrefs
 import dev.cecoffee.antifcm.R
 import dev.cecoffee.antifcm.databinding.ActivityMainBinding
 import dev.cecoffee.antifcm.ui.activity.base.BaseActivity
 import dev.cecoffee.antifcm.application.BuildConfig
-import dev.cecoffee.antifcm.application.DefaultApplication
+import dev.cecoffee.antifcm.application.ModulePrefs
 
 class MainActivity : BaseActivity<ActivityMainBinding>() {
 
     override fun onCreate() {
-        val application = DefaultApplication
         refreshModuleStatus()
         binding.mainTextVersion.text = getString(R.string.module_version, BuildConfig.VERSION_NAME)
         binding.hideIconInLauncherSwitch.isChecked = isLauncherIconShowing.not()
@@ -27,15 +27,15 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
             if (button.isPressed) hideOrShowLauncherIcon(isChecked)
         }
         // init button status
-        binding.cancelHeartbeatSwitch.isChecked = application.isCancelHeartbeat()
-        binding.bypassSdkSwitch.isChecked = application.isBypassSdk()
+        binding.cancelHeartbeatSwitch.isChecked = modulePrefs.getBoolean("cancelHeartbeat")
+        binding.bypassSdkSwitch.isChecked = modulePrefs.getBoolean("bypassSDK")
 
         // set Listener
         binding.cancelHeartbeatSwitch.setOnCheckedChangeListener{ button, isChecked ->
-            if (button.isPressed) application.setCancelHeartbeatStatus(isChecked)
+            if (button.isPressed) ModulePrefs().setCancelHeartbeatStatus(isChecked)
         }
         binding.bypassSdkSwitch.setOnCheckedChangeListener{ button, isChecked ->
-            if (button.isPressed) application.setBypassSdkStatus(isChecked)
+            if (button.isPressed) ModulePrefs().setBypassSdkStatus(isChecked)
         }
         binding.githubButton.setOnClickListener { jumpToGithubPage() }
     }
@@ -112,9 +112,9 @@ class MainActivity : BaseActivity<ActivityMainBinding>() {
         )
         binding.mainTextApiWay.isVisible = YukiHookAPI.Status.isModuleActive
         when {
-            YukiHookAPI.Status.executorVersion > 0 ->
+            Executor.apiLevel > 0 ->
                 binding.mainTextApiWay.text =
-                    "Activated by ${YukiHookAPI.Status.executorName} API ${YukiHookAPI.Status.executorVersion}"
+                    "Activated by ${Executor.name} API ${Executor.apiLevel}"
             YukiHookAPI.Status.isTaiChiModuleActive -> binding.mainTextApiWay.text = "Activated by TaiChi"
             else -> binding.mainTextApiWay.text = "Activated by anonymous"
         }

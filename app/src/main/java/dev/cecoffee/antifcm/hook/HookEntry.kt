@@ -4,53 +4,49 @@ import android.widget.Toast
 import com.highcapable.yukihookapi.annotation.xposed.InjectYukiHookWithXposed
 import com.highcapable.yukihookapi.hook.factory.configs
 import com.highcapable.yukihookapi.hook.factory.encase
-import com.highcapable.yukihookapi.hook.log.loggerD
-import com.highcapable.yukihookapi.hook.type.android.ActivityClass
 import com.highcapable.yukihookapi.hook.type.android.BundleClass
-import com.highcapable.yukihookapi.hook.type.java.MapClass
-import com.highcapable.yukihookapi.hook.type.java.StringType
 import com.highcapable.yukihookapi.hook.type.java.UnitType
 import com.highcapable.yukihookapi.hook.xposed.proxy.IYukiHookXposedInit
-import org.ktorm.database.Database
 import de.robv.android.xposed.XposedBridge
-import dev.cecoffee.antifcm.application.DefaultApplication
+import dev.cecoffee.antifcm.application.BuildConfig
+import dev.cecoffee.antifcm.utils.factory.DataHandler
 import dev.cecoffee.antifcm.utils.factory.DataHandler.Companion.uidDataList
-import dev.cecoffee.antifcm.utils.factory.DataSelectDialog
-import dev.cecoffee.antifcm.utils.factory.UserDB
-import org.ktorm.entity.sequenceOf
-import java.io.FileInputStream
+import dev.cecoffee.antifcm.ui.dialog.DataSelectDialog
+import java.io.File
 
 @InjectYukiHookWithXposed
 class HookEntry : IYukiHookXposedInit {
-    private val application = DefaultApplication
     override fun onInit() = configs {
-        // Your code here.
-        this.debugTag = "AntiFCM"
-        this.isDebug = true
+        debugLog {
+            tag = "AntiFCM"
+            isEnable = true
+            isRecord = false
+            elements(TAG, PRIORITY, PACKAGE_NAME, USER_ID)
+        }
+        isDebug = BuildConfig.DEBUG
+        isEnableModulePrefsCache = true
+        isEnableModuleAppResourcesCache = true
+        isEnableHookModuleStatus = true
+        isEnableHookSharedPreferences = true
+        isEnableDataChannel = true
+        isEnableMemberCache = true
     }
 
     override fun onHook() = encase {
-        // Your code here.
         loadApp("com.bilibili.azurlane") {
             "com.manjuu.azurlane.MainActivity".hook {
                 injectMember {
                     beforeHook {
-                        val path = appContext?.filesDir
-                        if (path != null) {
-                            FileInputStream(path.path + "/databases/users.db").use {
-                                try {
-                                    val database = Database.connect("jdbc:sqlite:${path.path}/databases/users.db", "org.sqlite.JDBC")
-                                    val userDB = database.sequenceOf(UserDB)
-                                    //TODO 将数据库中的所有uid读取到uidDataList中
-                                    Toast.makeText(appContext,userDB.totalRecords,Toast.LENGTH_SHORT).show()
-                                }catch (e:Exception){
-                                    XposedBridge.log(e)
-                                    Toast.makeText(appContext,"数据库连接失败",Toast.LENGTH_SHORT).show()
-                                }
+                        val database: File? = appContext?.getDatabasePath("users.db")
+                        if (database != null) {
+                            try {
+                                //TODO 将数据库中的所有uid读取到uidDataList中
+                            }catch (e:Exception){
+                                XposedBridge.log(e)
+                                Toast.makeText(appContext,"数据库连接失败",Toast.LENGTH_SHORT).show()
                             }
-                        } else { XposedBridge.log("path为null") }
+                        }else { XposedBridge.log("database为null") }
                     }
-                    // 以上纯乱写，不保证能用
                     method {
                         name = "onCreate"
                         param(BundleClass)
@@ -63,52 +59,18 @@ class HookEntry : IYukiHookXposedInit {
                 }
             }
 
-            //TODO 找到sdk登录接口，将uid等数据注入
+            loadHooker(HookHandler.SelectOutOfTime)
 
-            if (application.isBypassSdk()) {
-                "com.gsc.base.utils.CommonParamUtils".hook {
-                    loggerD(msg = "Z: $this")
-                    injectMember {
-                        method {
-                            name = "generateSign"
-                            param(MapClass)
-                            returnType = StringType
-                        }
-                        beforeHook {
-                            (args[0] as java.util.Map<*, *>).remove("sdk_ver")
-                        }
-                    }
-                }
-
-                "okhttp3.FormBody\$Builder".hook {
-                    injectMember {
-                        method {
-                            name = "addEncoded"
-                            param(StringType, StringType)
-                        }
-                        afterHook {
-                            val key = args[0]
-                            loggerD(msg = "key: $key")
-                            if (key == "sdk_ver") {
-                                resultNull()
-                            }
-                        }
-                    }
-                }
+            if (!DataHandler.cancelHook) {
+                loadHooker(HookHandler.ForceLogin) //强制登录
+                loadHooker(HookHandler.InjectUserData) // 向GSCPubCommon的bundle中注入用户数据
             }
-            if (application.isCancelHeartbeat()) {
-                "com.gsc.pub.GSCPubCommon".hook {
-                    injectMember {
-                        method {
-                            name = "startHeart"
-                            param(ActivityClass)
-                        }
-                        replaceUnit {
-                            XposedBridge.log("取消心跳上报")
-                            Toast.makeText(appContext, "AntiFCM:取消心跳上报", Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                }
+
+            if (prefs.getBoolean("bypassSDK")) {
+                loadHooker(HookHandler.BypassSDK)
+            }
+            if (prefs.getBoolean("cancelHeartbeat")) {
+                loadHooker(HookHandler.CancelHeartBeat)
             }
         }
     }

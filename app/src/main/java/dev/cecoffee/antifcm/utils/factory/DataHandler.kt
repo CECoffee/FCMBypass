@@ -2,6 +2,8 @@ package dev.cecoffee.antifcm.utils.factory
 
 class DataHandler {
     companion object{
-        val uidDataList = mutableListOf<String>()
+        var uidDataList = mutableListOf<String>()
+        var cancelHook = false
+        var selectedData = ""
     }
 }
