@@ -35,7 +35,6 @@ class HookHandler {
                 injectMember {
                     method {
                         name = "login"
-                        param(UnitType)
                         returnType = UnitType
                     }
                     afterHook {
@@ -57,9 +56,12 @@ class HookHandler {
                         name = "login"
                     }
                     beforeHook {
+                        if (DataHandler.dialogDisplayed) {
+                            if (!DataHandler.cancelHook) { Toast.makeText(appContext, "超时未选，恢复原版登录", Toast.LENGTH_SHORT).show() }
+                            DataSelectDialog().dismissDataSelectDialog()
+                            DataHandler.dialogDisplayed = false
+                        }
                         DataHandler.cancelHook = true
-                        Toast.makeText(appContext,"选择超时，已取消",Toast.LENGTH_SHORT).show()
-                        DataSelectDialog().dismissDataSelectDialog()
                     }
                 }
             }
