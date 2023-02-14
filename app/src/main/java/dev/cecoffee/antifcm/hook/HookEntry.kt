@@ -7,12 +7,10 @@ import com.highcapable.yukihookapi.hook.factory.encase
 import com.highcapable.yukihookapi.hook.type.android.BundleClass
 import com.highcapable.yukihookapi.hook.type.java.UnitType
 import com.highcapable.yukihookapi.hook.xposed.proxy.IYukiHookXposedInit
-import de.robv.android.xposed.XposedBridge
 import dev.cecoffee.antifcm.application.BuildConfig
+import dev.cecoffee.antifcm.ui.dialog.DataSelectDialog
 import dev.cecoffee.antifcm.utils.factory.DataHandler
 import dev.cecoffee.antifcm.utils.factory.DataHandler.Companion.uidDataList
-import dev.cecoffee.antifcm.ui.dialog.DataSelectDialog
-import java.io.File
 
 @InjectYukiHookWithXposed
 class HookEntry : IYukiHookXposedInit {
@@ -37,15 +35,7 @@ class HookEntry : IYukiHookXposedInit {
             "com.manjuu.azurlane.MainActivity".hook {
                 injectMember {
                     beforeHook {
-                        val database: File? = appContext?.getDatabasePath("users.db")
-                        if (database != null) {
-                            try {
-                                //TODO 将数据库中的所有uid读取到uidDataList中
-                            }catch (e:Exception){
-                                XposedBridge.log(e)
-                                Toast.makeText(appContext,"数据库连接失败",Toast.LENGTH_SHORT).show()
-                            }
-                        }else { XposedBridge.log("database为null") }
+                        //TODO 拦截目标应用程序中的数据库读取方法，获取Cursor对象以读取uid，存入uidDataList
                     }
                     method {
                         name = "onCreate"

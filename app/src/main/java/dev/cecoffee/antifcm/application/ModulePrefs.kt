@@ -6,6 +6,11 @@ import com.highcapable.yukihookapi.hook.xposed.application.ModuleApplication
 
 class ModulePrefs : ModuleApplication() {
     init {
+        // 初始化模块配置
+        if (!modulePrefs.name("cancelHeartbeat").isPreferencesAvailable) {
+            modulePrefs.putBoolean("cancelHeartbeat", true)
+            modulePrefs.putBoolean("bypassSDK", false)
+        }
     }
 
     fun setCancelHeartbeatStatus(bool: Boolean) {
@@ -23,11 +28,5 @@ class ModulePrefs : ModuleApplication() {
          * Follow system night mode
          */
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
-
-        // 初始化模块配置
-        if (!modulePrefs.name("cancelHeartbeat").isPreferencesAvailable) {
-            modulePrefs.putBoolean("cancelHeartbeat", true)
-            modulePrefs.putBoolean("bypassSDK", false)
-        }
     }
 }

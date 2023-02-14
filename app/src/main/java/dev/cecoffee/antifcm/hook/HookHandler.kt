@@ -31,18 +31,13 @@ class HookHandler {
 
     object ForceLogin : YukiBaseHooker(){
         override fun onHook() {
-            "com.manjuu.azurlane.GSCSdkCenter".hook {
+            "com.manjuu.azurlane.GSCSdkCenter$2".hook {
                 injectMember {
                     method {
-                        name = "login"
+                        name = "onExit"
                         returnType = UnitType
                     }
-                    afterHook {
-                        // TODO 强制登录
-                    }
-                    replaceUnit {
-
-                    }
+                    replaceUnit {  }
                 }
             }
         }
